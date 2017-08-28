@@ -13,31 +13,33 @@ namespace ConsoleApplication1
     {
         static void Main(string[] args)
         {
-            using (NetMQContext context = NetMQContext.Create())
+            //using (NetMQContext context = NetMQContext.Create())
             {
-                using (WSRouter router = context.CreateWSRouter())
-                using (WSPublisher publisher = context.CreateWSPublisher())
+                using (WSRouter router = new WSRouter())
+                using (WSPublisher publisher = new WSPublisher())
                 {
                     router.Bind("ws://localhost:80");                    
                     publisher.Bind("ws://localhost:81");
 
                     router.ReceiveReady += (sender, eventArgs) =>
                     {
-                        string identity = router.ReceiveString();
-                        string message = router.ReceiveString();
-
-                        router.SendMore(identity).Send("OK");
-
-                        publisher.SendMore("chat").Send(message);
-                    };
                         
-                    Poller poller = new Poller();
-                    poller.AddSocket(router);
+                        string identity = router.ReceiveFrameString();
+                        string message = router.ReceiveFrameString();
+
+                        router.SendMoreFrame(identity).SendFrame("OK");
+
+                        publisher.SendMoreFrame("chat").SendFrame(message);
+                    };
+                    
+                    NetMQPoller poller = new NetMQPoller();
+                    
+                    poller.Add(router);
 
                     // we must add the publisher to the poller although we are not registering to any event.
                     // The internal stream socket handle connections and subscriptions and use the events internally
-                    poller.AddSocket(publisher);
-                    poller.Start();
+                    poller.Add(publisher);
+                    poller.Run();
 
                 }
             }

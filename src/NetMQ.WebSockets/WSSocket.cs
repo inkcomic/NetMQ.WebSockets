@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NetMQ.Sockets;
 
+
 namespace NetMQ.WebSockets
 {
     public class WSSocketEventArgs : EventArgs
@@ -72,25 +73,34 @@ namespace NetMQ.WebSockets
             }
         }
 
-        public void Receive(ref Msg msg, SendReceiveOptions options)
-        {
-            m_messagesPipe.Receive(ref msg, options);
-        }
-
         public bool TryReceive(ref Msg msg, TimeSpan timeout)
         {
             return m_messagesPipe.TryReceive(ref msg, timeout);
         }
+        /* public void Receive(ref Msg msg, SendReceiveOptions options)
+         {
+             m_messagesPipe.Receive(ref msg, options);
+         }
 
-        public void Send(ref Msg msg, SendReceiveOptions options)
+         public bool TryReceive(ref Msg msg, TimeSpan timeout)
+         {
+             return m_messagesPipe.TryReceive(ref msg, timeout);
+         }
+
+         public void Send(ref Msg msg, SendReceiveOptions options)
+         {
+             m_messagesPipe.Send(ref msg, options);
+         }
+         public bool TrySend(ref Msg msg, TimeSpan timeout, bool more)
         {
-            m_messagesPipe.Send(ref msg, options);
-        }
-
+            return m_messagesPipe.TrySend(ref msg, timeout, more);
+        }  
+ */
         public bool TrySend(ref Msg msg, TimeSpan timeout, bool more)
         {
             return m_messagesPipe.TrySend(ref msg, timeout, more);
-        }                
+        }
+                      
 
         public void Dispose()
         {
