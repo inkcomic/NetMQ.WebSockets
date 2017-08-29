@@ -34,7 +34,26 @@ namespace NetMQ.WebSockets
         {
             var outgoingData = Encode(message, more);
 
-            m_stream.SendMoreFrame(identity).SendFrame(outgoingData);
+            try
+            {
+                if (m_stream.HasOut)
+                    m_stream.SendMoreFrame(identity).SendFrame(outgoingData);
+            }
+            catch (NetMQException e)
+            {
+                WebSocketClient client;
+
+                if (m_clients.TryGetValue(identity, out client))
+                {
+                    m_clients.Remove(identity);
+                    client.IncomingMessage -= OnIncomingMessage;
+                    OnClientRemoved(identity);
+                }
+
+                Console.WriteLine("NetMQ.WebSockets Error:" + e);
+            }
+
+
         }
 
         protected void WriteIngoing(NetMQMessage message)
